@@ -1,0 +1,19 @@
+[
+    {
+      "x": -49,
+      "y": -25,
+      "label": "Mike",
+      "id": "ff602cfd-84fa-46d2-8ee8-57ff043e1f0a",
+      "connections": [
+        "ff602cfd-84fa-46d2-8ee8-57ff043e1f0a",
+        "e63bdcd1-3ce8-47cf-a0d6-037de67b9292"
+      ]
+    },
+    {
+      "x": 48,
+      "y": 40,
+      "label": "Sharon",
+      "id": "e63bdcd1-3ce8-47cf-a0d6-037de67b9292",
+      "connections": []
+    }
+  ]

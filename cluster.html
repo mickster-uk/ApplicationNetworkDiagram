@@ -1,91 +1,144 @@
-
 <!doctype html>
 <html>
+
 <head>
-  <title>Network | Clustering</title>
+    <title>Network | Clustering</title>
 
-  <script type="text/javascript" src="./js/vis/dist/vis.js"></script>
-  <link href="./js/vis/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="./js/vis/dist/vis.js"></script>
+    <link href="./js/vis/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
 
-  <style type="text/css">
-    #mynetwork {
-        width: 600px;
-        height: 600px;
-        border: 1px solid lightgray;
-    }
-    p {
-        max-width:600px;
-    }
+    <style type="text/css">
+        #mynetwork {
+            width: 600px;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
 
-    h4 {
-        margin-bottom:3px;
-    }
-  </style>
-  
+        p {
+            max-width: 600px;
+        }
+
+        h4 {
+            margin-bottom: 3px;
+        }
+    </style>
+
 </head>
 
 <body>
 
 
-<p>
-Click any of the buttons below to cluster the network. On every push the network will be reinitialized first. You can click on a cluster to open it.
-</p>
+    <p>
+        Click any of the buttons below to cluster the network. On every push the network will be reinitialized first. You can click
+        on a cluster to open it.
+    </p>
 
-<input type="button" onclick="clusterByCid()" value="Cluster all nodes with CID = 1"> <br />
+    <input type="button" onclick="clusterByCid(2)" value="Cluster all nodes with CID = 1">
+    <br />
 
-<div id="mynetwork"></div>
+    <div id="mynetwork"></div>
 
-<script type="text/javascript">
-  // create an array with nodes
-  var nodes = [
-    {id: 1,  label: 'Node 1', color:'orange'},
-    {id: 2,  label: 'Node 2', color:'DarkViolet', font:{color:'white'}},
-    {id: 3,  label: 'Node 3', color:'orange'},
-    {id: 4,  label: 'Node 4', color:'DarkViolet', font:{color:'white'}},
-    {id: 5,  label: 'Node 5', color:'orange'},
-    {id: 6,  label: 'Transform', cid:1, color:'orange'},
-    {id: 7,  label: 'SAP', cid:2, color:'DarkViolet', font:{color:'white'}},
-    {id: 8,  label: 'Unisys', cid:3, color:'lime'},
-  ];
+    <script type="text/javascript">
+        // create an array with nodes
+        var nodes = [
+            { id: 1, label: '1. SAP', group: 0, cid: 1, color: 'orange', shape: 'box' },
+            { id: 2, label: '2. Transform', group: 1, cid: 2, color: 'green', shape: 'box', font: { color: 'black' } },
+            { id: 3, label: '3. Unisys', group: 2, cid: 3, color: 'blue', shape: 'box', font: { color: 'white' } },
+            { id: 4, label: '4. AccountV5.EnquireV5', group: 2, cid: 3, shape: 'box' },
+            { id: 5, label: '5. BankAccountStatementEntries.Retrieve', group: 0, cid: 1, shape: 'box' },
+            { id: 6, label: '6. BankAccountEnvironment/BankAccountContract/ID', group: 0, cid: 1, shape: 'box' },
+            { id: 7, label: '7. Transform Child', group: 1, cid: 2, shape: 'box' },
+        ];
 
-  // create an array with edges
-  var edges = [
-    {from: 1, to: 2},
-    {from: 1, to: 3},
-    {from: 2, to: 5},
-    {from: 6, to: 2},
-    {from: 7, to: 5},
-    {from: 8, to: 6},
-  ];
+        // create an array with edges
+        var edges = [
+            { from: 2, to: 3 },
+            { from: 3, to: 4 },
+            { from: 2, to: 1 },
+            { from: 1, to: 5 },
+            { from: 6, to: 5 },
+            { from: 7, to: 2 },
+        ];
 
-  // create a network
-  var container = document.getElementById('mynetwork');
-  var data = {
-    nodes: nodes,
-    edges: edges
-  };
-  var options = {layout:{randomSeed:8}};
-  var network = new vis.Network(container, data, options);
-  network.on("selectNode", function(params) {
-      if (params.nodes.length == 1) {
-          if (network.isCluster(params.nodes[0]) == true) {
-              network.openCluster(params.nodes[0]);
-          }
-      }
-  });
+        // create a network
+        var container = document.getElementById('mynetwork');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        var options = { layout: { randomSeed: 2 } };
+        var network = new vis.Network(container, data, options);
 
-  function clusterByCid() {
-      network.setData(data);
-      var clusterOptionsByData = {
-          joinCondition:function(childOptions) {
-              return childOptions.cid == 1;
-          },
-          clusterNodeProperties: {id:'cidCluster', borderWidth:3, shape:'database'}
-      };
-      network.cluster(clusterOptionsByData);
-  }
+        network.on("click", function (params) {
+            if (params.nodes.length == 1) {
+                clusterByConnection(params.nodes[0]);
+            }
+        });
+        network.on("selectNode", function (params) {
+            if (params.nodes.length == 1) {
+                if (network.isCluster(params.nodes[0]) == true) {
+                    network.openCluster(params.nodes[0]);
+                }
+            }
+        });
 
-</script>
+        function clusterByConnection(nodeID) {
+            network.setData(data);
+            network.clusterByConnection(nodeID);
+        };
+
+        function clusterByCid(clInput) {
+            network.setData(data);
+            if (clInput === 1) {
+                var clusterOptionsByData = {
+                    joinCondition: function (childOptions) {
+                        return childOptions.cid == clInput;
+                    },
+                    clusterNodeProperties: { id: 'sapCluster', group: 0, borderWidth: 3, shape: 'box', label: 'SAP' }
+                };
+            }
+
+            if (clInput === 2) {
+                var clusterOptionsByData = {
+                    joinCondition: function (childOptions) {
+                        return childOptions.cid == clInput;
+                    },
+                    clusterNodeProperties: { id: 'transformCluster', group: 1, borderWidth: 3, shape: 'box', label: 'Transform' }
+                };
+            }
+
+            if (clInput === 3) {
+                var clusterOptionsByData = {
+                    joinCondition: function (childOptions) {
+                        return childOptions.cid == clInput;
+                    },
+                    clusterNodeProperties: { id: 'UnisysCluster', group: 2, borderWidth: 3, shape: 'box', label: 'Unisys' }
+                };
+            }
+            network.cluster(clusterOptionsByData);            
+        }
+
+        function clusterByAll() {
+            network.setData(data);
+                var clusterOptionsByData = {
+                    joinCondition: function (childOptions) {
+                        return childOptions.cid == 1;
+                    },
+                    clusterNodeProperties: { id: 'sapCluster', group: 0, borderWidth: 3, shape: 'box', label: 'SAP' }
+                };
+                var clusterOptionsByData = {
+                    joinCondition: function (childOptions) {
+                        return childOptions.cid == 2;
+                    },
+                    clusterNodeProperties: { id: 'transformCluster', group: 1, borderWidth: 3, shape: 'box', label: 'Transform' }
+                };
+            }
+            }
+
+        }
+
+    </script>
 
 </body>
+
 </html>
